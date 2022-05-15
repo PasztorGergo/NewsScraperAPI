@@ -6,15 +6,23 @@ const app = express();
 const PORT = 5000;
 const article = [];
 
-const scraper = async (title) => {
+const scraper = async (country, language) => {
   if (article.length > 0) article.splice(0, article.length);
-  const res = await axios("https://www.cnbc.com/business");
+  const res = await axios(
+    `https://news.google.com/topstories?hl=${language}&gl=${country}&ceid=${country}:${language}`
+  );
   const html = res.data;
   const $ = cheerio.load(html);
-  $(".Card-titleContainer", html).each((item, el) => {
+  $("h3", html).each((item, el) => {
     article.push({
       title: $(el).text(),
-      href: $(el).find("a").attr("href"),
+      href: `https:news.google.com${$(el).find("a").attr("href").substring(1)}`,
+    });
+  });
+  $("h4", html).each((item, el) => {
+    article.push({
+      title: $(el).text(),
+      href: `https:news.google.com${$(el).find("a").attr("href").substring(1)}`,
     });
   });
 };
@@ -23,14 +31,9 @@ app.get("/", (req, res) => {
 });
 
 app.get("/news", async (req, res) => {
-  await scraper();
+  const { country, lang } = req.query;
+  await scraper(country, lang);
   res.send(article);
-});
-
-app.get("/news/:title", async (req, res) => {
-  const { title } = req.params;
-  await scraper();
-  res.send(article.filter((item) => item.title.includes(title)));
 });
 
 app.listen(PORT, () =>
