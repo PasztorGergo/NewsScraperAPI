@@ -6,24 +6,36 @@ const app = express();
 const PORT = 5000;
 const article = [];
 
-const scraper = async (country, language) => {
+const scraper = async (country, language, title) => {
   if (article.length > 0) article.splice(0, article.length);
   const res = await axios(
-    `https://news.google.com/topstories?hl=${language}&gl=${country}&ceid=${country}:${language}`
+    `https://news.google.com/${
+      title ? `search?q=${title}&` : "topstories?"
+    }hl=${language}&gl=${country}&ceid=${country}:${language}`
   );
   const html = res.data;
   const $ = cheerio.load(html);
-  $("h3", html).each((item, el) => {
-    article.push({
-      title: $(el).text(),
-      href: `https:news.google.com${$(el).find("a").attr("href").substring(1)}`,
-    });
+  $("article", html).each((item, el) => {
+    $(el).find("h3").text() &&
+      article.push({
+        title: $(el).find("h3").text(),
+        href: `https:news.google.com${$(el)
+          .find("a")
+          .attr("href")
+          .substring(1)}`,
+        publish_date: $(el).find("time").attr("datetime"),
+      });
   });
-  $("h4", html).each((item, el) => {
-    article.push({
-      title: $(el).text(),
-      href: `https:news.google.com${$(el).find("a").attr("href").substring(1)}`,
-    });
+  $("article", html).each((item, el) => {
+    $(el).find("h4").text() &&
+      article.push({
+        title: $(el).find("h4").text(),
+        href: `https:news.google.com${$(el)
+          .find("a")
+          .attr("href")
+          .substring(1)}`,
+        publish_date: $(el).find("time").attr("datetime"),
+      });
   });
 };
 app.get("/", (req, res) => {
@@ -33,6 +45,13 @@ app.get("/", (req, res) => {
 app.get("/news", async (req, res) => {
   const { country, lang } = req.query;
   await scraper(country, lang);
+  res.send(article);
+});
+
+app.get("/news/:title", async (req, res) => {
+  const { title } = req.params;
+  const { country, lang } = req.query;
+  await scraper(country, lang, title);
   res.send(article);
 });
 
