@@ -40,21 +40,18 @@ const scraper = async (country, language, title) => {
       });
   });
 };
-app.get("/", (req, res) => {
-  res.send("Welcome!");
-});
 
-app.get("/news", async (req, res) => {
+app.get("/", async (req, res) => {
   const { country, lang } = req.query;
   await scraper(country, lang);
-  res.send(article);
+  res.json(article);
 });
 
-app.get("/news/:title", async (req, res) => {
+app.get("/:title", async (req, res) => {
   const { title } = req.params;
   const { country, lang } = req.query;
   await scraper(country, lang, title);
-  res.send(article);
+  res.json(article);
 });
 
 app.listen(PORT, () =>
