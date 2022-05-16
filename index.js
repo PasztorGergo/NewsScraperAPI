@@ -11,7 +11,7 @@ const scraper = async (country, language, title) => {
   const res = await axios(
     `https://news.google.com/${
       title ? `search?q=${title}&` : "topstories?"
-    }hl=${language}&gl=${country}&ceid=${country}:${language}`
+    }gl=${country}&ceid=${country}`
   );
   const html = res.data;
   const $ = cheerio.load(html);
@@ -19,22 +19,24 @@ const scraper = async (country, language, title) => {
     $(el).find("h3").text() &&
       article.push({
         title: $(el).find("h3").text(),
-        href: `https:news.google.com${$(el)
+        url: `https:news.google.com${$(el)
           .find("a")
           .attr("href")
           .substring(1)}`,
         publish_date: $(el).find("time").attr("datetime"),
+        provider: $(el).find("a.wEwyrc").text(),
       });
   });
   $("article", html).each((item, el) => {
     $(el).find("h4").text() &&
       article.push({
         title: $(el).find("h4").text(),
-        href: `https:news.google.com${$(el)
+        url: `https:news.google.com${$(el)
           .find("a")
           .attr("href")
           .substring(1)}`,
         publish_date: $(el).find("time").attr("datetime"),
+        provider: $(el).find("a.wEwyrc").text(),
       });
   });
 };
