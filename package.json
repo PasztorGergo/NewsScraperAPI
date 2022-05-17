@@ -5,8 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "type": "tsc index.ts --esModuleInterop -w",
-    "dev": "nodemon ."
+    "dev": "nodemon .",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
