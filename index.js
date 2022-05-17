@@ -3,8 +3,10 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const article = [];
+
+app.use(express.json());
 
 const scraper = async (country, language, title) => {
   if (article.length > 0) article.splice(0, article.length);
